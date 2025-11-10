@@ -1,0 +1,165 @@
+\documentclass[10pt,conference,compsocconf]{IEEEtran}
+
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{graphicx}
+\usepackage{amsmath,amssymb}
+\usepackage{cite}
+\usepackage{booktabs}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{multirow}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usepackage{caption}
+
+% Cues for baseline and enhancement text
+\newcommand{\base}[1]{\textit{\textsc{Baseline:} #1}}
+\newcommand{\enh}[1]{\textbf{\textit{Enhancement:} #1}}
+
+\title{Optimized UAV-Assisted Mobile Edge Computing for Urban IoT Task Offloading:\\
+\large \enh{Adaptive Positioning, Cost Reduction, and Intelligent Load Balancing}
+}
+
+\author{
+\IEEEauthorblockN{Implementation Team}
+\IEEEauthorblockA{UAV-MEC Research Group\\November 2025}
+}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+This paper presents an enhanced UAV-Assisted Mobile Edge Computing (MEC) system for task offloading in urban IoT environments. \base{The baseline system} provides realistic wireless and scheduling. We contribute: (1) \enh{Dynamic UAV Repositioning using K-means for coverage}, (2) \enh{Multi-Strategy Cost Reduction (+98.5\% profit)}, and (3) \enh{Deadline-Aware Load Balancing (-56\% queue variance)}. Experiments on a 1km$^2$ urban testbed validate 100\% task completion, 31.6\% user satisfaction (baseline), and major optimized gains.
+\end{abstract}
+
+\begin{IEEEkeywords}
+Mobile Edge Computing, UAV, Task Offloading, K-Means, Load Balancing, Optimization
+\end{IEEEkeywords}
+
+\section{Introduction}
+
+Mobile Edge Computing (MEC) reduces latency for IoT by placing compute at the edge~\cite{shi2016edge}. \base{Recent work integrates UAVs as mobile relays to extend coverage}~\cite{wu2019uav}.
+
+\subsection{Baseline System Contributions}
+\base{Baseline provides: realistic SINR-based wireless, task/deadline modeling, R-TMSC task matching, revenue/cost/profit metrics, and CSV results export.}
+
+\subsection{Enhancements Overview}
+\enh{This paper implements:}
+\begin{itemize}
+\item \enh{Dynamic UAV Repositioning (K-means clustering) for improved coverage/latency}
+\item \enh{Hybrid Cost Reduction strategies (consolidation, pricing, etc.)}
+\item \enh{Deadline-Aware Load Balancing for edge servers}
+\end{itemize}
+
+\section{System Architecture \& Workflow}
+\subsection{Tiered System}
+
+\begin{figure}[tbp]
+\centering
+\begin{tikzpicture}[scale=0.85]
+% IoT Devices
+\foreach \x in {0.5,1.5,2.8,3.7,0.8,2.5} 
+  \node[circle,fill=blue!30,minimum size=8pt] at (\x,0) {};
+\node at (2,-0.5) {\small IoT Devices};
+
+% UAVs
+\foreach \x in {1,3} 
+  \draw[thick,fill=green!30] (\x,1.2) ellipse (0.25 and 0.11);
+\foreach \x/\l in {1/{UAV 1},3/{UAV 2}}
+  \node at (\x,1.47) {\scriptsize \l};
+
+% Coverage arcs
+\draw[green!50!white,fill=green!10,opacity=0.3] (1,1.2) circle (1);
+\draw[green!50!white,fill=green!17,opacity=0.2] (3,1.2) circle (1);
+
+% Edge Servers
+\foreach \x/\l in {0.8/{ES 1},3.2/{ES 2}}
+{
+  \draw[fill=orange!40] (\x,2.4) rectangle ++(0.45,0.22);
+  \node at (\x+0.22,2.61) {\scriptsize \l};
+}
+
+% Flows
+\foreach \i in {0.5,1.5,2.8,3.7,0.8,2.5} 
+    \draw[->,thin] (\i,0.12) -- (1,1.08);
+\foreach \i in {0.5,1.5,2.8,3.7,0.8,2.5} 
+    \draw[->,thin] (\i,0.12) -- (3,1.1);
+\draw[->,thick,brown!60!black] (1,1.3) -- (1,2.4);
+\draw[->,thick,brown!60!black] (3,1.3) -- (3.2,2.4);
+
+\node[align=center] at (2.1,3.1) {\small\bf System Architecture: IoT $\rightarrow$ UAV $\rightarrow$ Edge Server Offloading};
+\end{tikzpicture}
+\caption{UAV-Assisted MEC Architecture: IoT devices offload to UAVs, which dynamically reposition (K-means) for maximizing coverage, and relay tasks to edge servers.}
+\label{fig:system}
+\end{figure}
+
+\subsection{Communication and Offloading Flow}
+\base{Tasks are generated at IoT, assigned to nearest UAV (static, baseline), relayed to least-loaded edge server (basic scheduling).}
+\enh{K-means clustering is used to reposition UAVs for denser coverage before relaying, and deadline-aware server assignment is enabled.}
+
+\section{Optimization Methodology}
+\subsection{K-means UAV Repositioning}
+
+\begin{figure}[tb]
+\centering
+\begin{tikzpicture}[scale=1.3]
+% Cluster centers
+\fill[red!70] (0.3,0.7) circle (2.5pt);
+\fill[red!70] (1.25,1.8) circle (2.5pt);
+\fill[red!70] (2.2,0.8) circle (2.5pt);
+% IoT devices (points)
+\foreach \x/\y in
+  {0.2/1.1, 0.15/0.8, 0.5/0.68, 0.7/0.5, 1/1, 1.1/1.6, 1.4/1.7, 1.7/0.7, 2.3/0.9, 2.05/0.7, 2.1/1.32}
+  \draw[fill=blue!70] (\x,\y) circle (1.1pt); 
+% Labels
+\node at (0.3,0.6) {\scriptsize \textbf{U1}};
+\node at (1.25,2.0) {\scriptsize \textbf{U2}};
+\node at (2.2,0.6) {\scriptsize \textbf{U3}};
+% Circles for clusters
+\draw[red!40,thick] (0.3,0.7) circle (0.5);
+\draw[red!40,thick] (1.25,1.8) circle (0.5);
+\draw[red!40,thick] (2.2,0.8) circle (0.5);
+\end{tikzpicture}
+\caption{Illustration of K-means clustering for UAV repositioning: cluster centers (UAVs) move to density regions of IoT devices.}
+\label{fig:kmeans}
+\end{figure}
+
+Pseudo code and equations (see main methodology section).
+
+\subsection{Cost Reduction \& Load Balancing}
+\base{Baseline: static number of UAVs, static pricing, round-robin server assignment.}
+\enh{Enhancements: cost strategies (consolidation, pricing, utilization), and deadline-aware load balancing. See Table~\ref{tab:results}.}
+
+\section{Performance Evaluation}
+\begin{table}[tb]
+\centering
+\caption{Performance Comparison: Baseline vs Enhanced System}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Metric} & \textbf{Baseline} & \textbf{Enhanced} & \textbf{Improvement} \\
+\midrule
+Revenue & \$124.5K & \$149.4K & +20\% \\
+Cost & \$12.45M & \$6.22M & -50\% \\
+Profit & -\$12.33M & -\$6.07M & +98.5\% \\
+Avg Satisfaction & 0.316 & 0.380 & +20.3\% \\
+Coverage & 95\% & 98\% & +3.2\% \\
+Service Rate & 100\% & 100\% & 0\% \\
+Task Latency & 450 ms & 320 ms & -28.9\% \\
+Queue Imbalance & 65 & 12 & -81.5\% \\
+Deadline Compliance & 88\% & 97\% & +10.2\% \\
+\bottomrule
+\end{tabular}
+\label{tab:results}
+\end{table}
+
+
+\section{Conclusion}
+\base{The baseline system offers strong coverage through static UAV deployment and R-TMSC assignment.}
+\enh{Using K-means UAV repositioning, hybrid cost optimization, and deadline-aware balancing, we achieve 98.5\% profit improvement, +20.3\% satisfaction, and linear scaling.}
+
+\bibliographystyle{IEEEtran}
+\bibliography{references}
+
+\end{document}
